@@ -1,4 +1,4 @@
-package com.pawpark.pawpark_backend;
+package com.pawpark.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

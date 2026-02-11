@@ -1,0 +1,11 @@
+package com.pawpark.backend.repository;
+
+import com.pawpark.backend.model.EstanciaParque;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface EstanciaParqueRepository extends JpaRepository<EstanciaParque, Long> {
+    List<EstanciaParque> findByParqueId(Long parqueId);
+    List<EstanciaParque> findByMascotaId(Long mascotaId);
+}
