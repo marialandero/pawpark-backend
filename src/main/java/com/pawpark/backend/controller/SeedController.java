@@ -27,7 +27,7 @@ public class SeedController {
 
         // Evitar crear duplicados
         if (usuarioRepository.count() > 0) {
-            return "✅ La base de datos ya tiene datos, no se creó seed.";
+            return "La base de datos ya tiene datos, no se creó seed.";
         }
 
         // --- Usuarios ---
@@ -152,6 +152,6 @@ public class SeedController {
 
         estanciaParqueRepository.saveAll(Arrays.asList(e1, e2));
 
-        return "✅ Seed ejecutado correctamente. Usuarios, mascotas, fotos y parques creados.";
+        return "Seed ejecutado correctamente. Usuarios, mascotas, fotos y parques creados.";
     }
 }

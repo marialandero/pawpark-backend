@@ -1,5 +1,6 @@
 package com.pawpark.backend.service;
 
+import com.pawpark.backend.exception.RecursoNoEncontradoException;
 import com.pawpark.backend.model.Usuario;
 import com.pawpark.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class UsuarioService {
 
     public Usuario obtenerUsuario(Long id) {
         return usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
     }
 
     public Usuario crearUsuario(Usuario usuario) {
