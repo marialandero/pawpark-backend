@@ -20,10 +20,14 @@ public class Usuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Para vincular el login con la autenticación de Firebase
+    @Column(unique = true)
+    private String firebaseUid;
+
     private String nombre;
     private String nickname;
     private String email;
-    private String password;
+
     private String fotoPerfil;
     private String localidad;
     private String memberSince;

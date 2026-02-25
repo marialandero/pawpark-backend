@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class UsuarioService {
@@ -21,6 +22,10 @@ public class UsuarioService {
     public Usuario obtenerUsuario(Long id) {
         return usuarioRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+    }
+
+    public Optional<Usuario> buscarPorFirebaseUid(String uid) {
+        return usuarioRepository.findByFirebaseUid(uid);
     }
 
     public Usuario crearUsuario(Usuario usuario) {

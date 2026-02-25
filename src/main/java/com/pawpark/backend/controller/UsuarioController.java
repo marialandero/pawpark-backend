@@ -5,12 +5,14 @@ import com.pawpark.backend.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
+@CrossOrigin(origins = "*") // <-- ORIGEN para habilitar la conexión desde el frontend (Flutter)
 @Tag(name = "Usuarios", description = "Operaciones relacionadas con los usuarios") // <-- TAG
 public class UsuarioController {
 
@@ -27,6 +29,15 @@ public class UsuarioController {
     @Operation(summary = "Obtener un usuario", description = "Devuelve un usuario según su ID")
     public Usuario obtenerUsuario(@PathVariable Long id) {
         return usuarioService.obtenerUsuario(id);
+    }
+
+    @GetMapping("/firebase/{Uid}")
+    @Operation(summary = "Obtener por Firebase UID", description = "Busca los datos de MySQL usando el ID de Firebase")
+    public ResponseEntity<Usuario> obtenerPorFirebaseUid(@PathVariable String uid) {
+        // Este método te servirá para que, al hacer login, Flutter pida los datos de este usuario
+        return usuarioService.buscarPorFirebaseUid(uid)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping

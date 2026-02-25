@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 @RestController
 @RequestMapping("/utils")
+@CrossOrigin(origins = "*") // <-- ORIGEN para habilitar la conexión desde el frontend (Flutter)
 @Tag(name = "Utils", description = "Sección para operaciones auxiliares")
 @RequiredArgsConstructor
 public class SeedController {
@@ -32,12 +33,12 @@ public class SeedController {
 
         // --- Usuarios ---
         Usuario maria = Usuario.builder()
-                .nombre("María González")
-                .nickname("mariaG")
-                .email("maria@example.com")
+                .nombre("María Landero")
+                .nickname("marialc")
+                .email("maria@gamil.com")
                 .fotoPerfil("https://images.unsplash.com/photo-1749700332038-640b00de758c")
-                .localidad("Parque del Retiro, Madrid")
-                .memberSince("2025")
+                .localidad("Plaza de las Marismas, Isla Cristina")
+                .memberSince("2026")
                 .encountersCount(5)
                 .amigos(new java.util.ArrayList<>()) // inicializar lista
                 .mascotas(new java.util.ArrayList<>())

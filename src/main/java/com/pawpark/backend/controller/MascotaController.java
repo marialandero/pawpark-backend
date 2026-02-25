@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/mascotas")
+@CrossOrigin(origins = "*") // <-- ORIGEN para habilitar la conexión desde el frontend (Flutter)
 @Tag(name = "Mascotas", description = "Operaciones relacionadas con las mascotas")
 public class MascotaController {
 
