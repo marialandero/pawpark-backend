@@ -31,10 +31,10 @@ public class UsuarioController {
         return usuarioService.obtenerUsuario(id);
     }
 
-    @GetMapping("/firebase/{Uid}")
+    @GetMapping("/firebase/{uid}")
     @Operation(summary = "Obtener por Firebase UID", description = "Busca los datos de MySQL usando el ID de Firebase")
     public ResponseEntity<Usuario> obtenerPorFirebaseUid(@PathVariable String uid) {
-        // Este método te servirá para que, al hacer login, Flutter pida los datos de este usuario
+        // Este método sirve para que, al hacer login, Flutter pida los datos de este usuario
         return usuarioService.buscarPorFirebaseUid(uid)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());

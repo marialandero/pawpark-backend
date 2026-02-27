@@ -1,13 +1,17 @@
 package com.pawpark.backend.controller;
 
+import com.pawpark.backend.model.Comportamiento;
 import com.pawpark.backend.model.Mascota;
+import com.pawpark.backend.model.Usuario;
 import com.pawpark.backend.service.MascotaService;
+import com.pawpark.backend.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/mascotas")
@@ -17,6 +21,37 @@ public class MascotaController {
 
     @Autowired
     private MascotaService mascotaService;
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @PostMapping
+    @Operation(summary = "Crear una mascota vinculada a un usuario")
+    public Mascota crearMascota(@RequestBody Map<String, Object> payload) {
+
+        // 1. Extraemos el UID que viene de Flutter
+        String firebaseUid = (String) payload.get("firebaseUidDueno");
+
+        // 2. Buscamos al usuario real (Usamos UsuarioService y guardamos en Usuario)
+        Usuario dueno = usuarioService.buscarPorFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con UID: " + firebaseUid));
+
+        // 3. Creamos el objeto Mascota manualmente con los datos del JSON
+        Mascota mascota = new Mascota();
+        mascota.setNombre((String) payload.get("nombre"));
+        mascota.setRaza((String) payload.get("raza"));
+        mascota.setEdad((Integer) payload.get("edad"));
+        mascota.setFoto((String) payload.get("foto"));
+
+        // Convertimos el String del comportamiento al Enum
+        String compString = (String) payload.get("comportamiento");
+        mascota.setComportamiento(Comportamiento.valueOf(compString));
+
+        // 4. ¡VINCULAMOS AL DUEÑO! (Esto es lo que te faltaba)
+        mascota.setDueno(dueno);
+
+        return mascotaService.crearMascota(mascota);
+    }
 
     @GetMapping
     @Operation(summary = "Listas todas las mascotas", description = "Devuelve la lista completa de mascotas")
@@ -30,11 +65,6 @@ public class MascotaController {
         return  mascotaService.obtenerMascota(id);
     }
 
-    @PostMapping
-    @Operation(summary = "Crear una mascota", description = "Crea una nueva mascota en la base de datos")
-    public Mascota crearMascota(@RequestBody Mascota mascota) {
-        return  mascotaService.crearMascota(mascota);
-    }
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualizar una mascota", description = "Actualiza los datos de una mascota existente")

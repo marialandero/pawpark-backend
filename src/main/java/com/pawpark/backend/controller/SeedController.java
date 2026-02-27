@@ -18,7 +18,6 @@ public class SeedController {
 
     private final UsuarioRepository usuarioRepository;
     private final MascotaRepository mascotaRepository;
-    private final FotoRepository fotoRepository;
     private final ParqueRepository parqueRepository;
     private final EstanciaParqueRepository estanciaParqueRepository;
 
@@ -32,11 +31,11 @@ public class SeedController {
         }
 
         // --- Usuarios ---
-        Usuario maria = Usuario.builder()
-                .nombre("María Landero")
-                .nickname("marialc")
-                .email("maria@gamil.com")
-                .fotoPerfil("https://images.unsplash.com/photo-1749700332038-640b00de758c")
+        Usuario marta = Usuario.builder()
+                .nombre("Marta Pérez")
+                .nickname("martaprz")
+                .email("marta@gmail.com")
+                .fotoPerfil("https://unsplash.com/es/fotos/closeup-photography-of-woman-smiling-mEZ3PoFGs_k")
                 .localidad("Plaza de las Marismas, Isla Cristina")
                 .memberSince("2026")
                 .encountersCount(5)
@@ -45,11 +44,11 @@ public class SeedController {
                 .build();
 
         Usuario juan = Usuario.builder()
-                .nombre("Juan Pérez")
-                .nickname("juanP")
-                .email("juan@example.com")
-                .fotoPerfil("https://images.unsplash.com/photo-1524504388940-b1c1722653e1")
-                .localidad("Madrid")
+                .nombre("Juan Ruíz")
+                .nickname("juanR")
+                .email("juan@gmail.com")
+                .fotoPerfil("https://unsplash.com/es/fotos/hombre-con-chaqueta-azul-y-gorra-amarilla-de-pie-en-la-montana-durante-el-dia-7TU5JJAwPyU")
+                .localidad("Ayamonte")
                 .memberSince("2024")
                 .encountersCount(3)
                 .amigos(new java.util.ArrayList<>())
@@ -57,10 +56,10 @@ public class SeedController {
                 .build();
 
         // Relación de amigos
-        maria.getAmigos().add(juan);
-        juan.getAmigos().add(maria);
+        marta.getAmigos().add(juan);
+        juan.getAmigos().add(marta);
 
-        usuarioRepository.saveAll(Arrays.asList(maria, juan));
+        usuarioRepository.saveAll(Arrays.asList(marta, juan));
 
         // --- Mascotas ---
         Mascota max = Mascota.builder()
@@ -70,7 +69,7 @@ public class SeedController {
                 .descripcion("Muy juguetón y amigable")
                 .foto("https://images.unsplash.com/photo-1734966213753-1b361564bab4")
                 .comportamiento(Comportamiento.JUGUETON)
-                .dueno(maria)
+                .dueno(marta)
                 .amigosFavoritos(new java.util.ArrayList<>())
                 .build();
 
@@ -81,7 +80,7 @@ public class SeedController {
                 .descripcion("Tranquila y cariñosa")
                 .foto("https://images.unsplash.com/photo-1684873050913-76ef6a740f8e")
                 .comportamiento(Comportamiento.TRANQUILO)
-                .dueno(maria)
+                .dueno(marta)
                 .amigosFavoritos(new java.util.ArrayList<>())
                 .build();
 
@@ -102,56 +101,39 @@ public class SeedController {
 
         mascotaRepository.saveAll(Arrays.asList(max, luna, rocky));
 
-        // --- Fotos ---
-        Foto foto1 = Foto.builder()
-                .url("https://images.unsplash.com/photo-1598136490432-99d36f3cfdc8")
-                .fechaSubida(LocalDateTime.now().minusDays(2))
-                .dueño(maria)
-                .mascotasEtiquetadas(Arrays.asList(max, luna))
-                .build();
-
-        Foto foto2 = Foto.builder()
-                .url("https://images.unsplash.com/photo-1592194996308-7b43878e84a6")
-                .fechaSubida(LocalDateTime.now().minusDays(1))
-                .dueño(juan)
-                .mascotasEtiquetadas(Arrays.asList(rocky))
-                .build();
-
-        fotoRepository.saveAll(Arrays.asList(foto1, foto2));
-
         // --- Parques ---
-        Parque retiro = Parque.builder()
-                .nombre("Parque del Retiro")
+        Parque plaza = Parque.builder()
+                .nombre("Plaza de las Marismas")
                 .latitud(40.4153)
                 .longitud(-3.6847)
-                .localidad("Madrid")
+                .localidad("Isla Cristina")
                 .build();
 
-        Parque casaDeCampo = Parque.builder()
-                .nombre("Casa de Campo")
+        Parque paseo = Parque.builder()
+                .nombre("Paseo de las Flores")
                 .latitud(40.4260)
                 .longitud(-3.7453)
-                .localidad("Madrid")
+                .localidad("Isla Cristina")
                 .build();
 
-        parqueRepository.saveAll(Arrays.asList(retiro, casaDeCampo));
+        parqueRepository.saveAll(Arrays.asList(plaza, paseo));
 
         // --- Estancias en parques ---
-        EstanciaParque e1 = EstanciaParque.builder()
+        EstanciaParque ep1 = EstanciaParque.builder()
                 .mascota(max)
-                .parque(retiro)
+                .parque(plaza)
                 .fechaEntrada(LocalDateTime.now().minusHours(1))
                 .fechaSalida(null)
                 .build();
 
-        EstanciaParque e2 = EstanciaParque.builder()
+        EstanciaParque ep2 = EstanciaParque.builder()
                 .mascota(rocky)
-                .parque(casaDeCampo)
+                .parque(paseo)
                 .fechaEntrada(LocalDateTime.now().minusHours(2))
                 .fechaSalida(null)
                 .build();
 
-        estanciaParqueRepository.saveAll(Arrays.asList(e1, e2));
+        estanciaParqueRepository.saveAll(Arrays.asList(ep1, ep2));
 
         return "Seed ejecutado correctamente. Usuarios, mascotas, fotos y parques creados.";
     }

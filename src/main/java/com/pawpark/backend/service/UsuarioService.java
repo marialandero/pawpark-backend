@@ -39,6 +39,7 @@ public class UsuarioService {
         usuario.setEmail(datos.getEmail());
         usuario.setFotoPerfil(datos.getFotoPerfil());
         usuario.setLocalidad(datos.getLocalidad());
+        usuario.setEncountersCount(datos.getEncountersCount());
         return usuarioRepository.save(usuario);
     }
 

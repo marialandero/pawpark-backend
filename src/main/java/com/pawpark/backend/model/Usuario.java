@@ -1,5 +1,6 @@
 package com.pawpark.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,6 +36,7 @@ public class Usuario {
 
     // Mascotas del usuario
     @OneToMany(mappedBy = "dueno", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnoreProperties("dueno")
     private List<Mascota> mascotas = new ArrayList<>();
 
     // Amigos (otros usuarios)
