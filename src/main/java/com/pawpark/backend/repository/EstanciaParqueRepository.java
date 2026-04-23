@@ -8,4 +8,6 @@ import java.util.List;
 public interface EstanciaParqueRepository extends JpaRepository<EstanciaParque, Long> {
     List<EstanciaParque> findByParqueId(Long parqueId);
     List<EstanciaParque> findByMascotaId(Long mascotaId);
+    // Para ver quién está actualmente en un parque específico
+    List<EstanciaParque> findByParqueIdAndFechaSalidaIsNull(Long parqueId);
 }

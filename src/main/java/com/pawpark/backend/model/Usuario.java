@@ -28,6 +28,8 @@ public class Usuario {
     private String nombre;
     private String nickname;
     private String email;
+    @Column(columnDefinition = "TEXT")
+    private String descripcion;
 
     private String fotoPerfil;
     private String localidad;
@@ -46,5 +48,7 @@ public class Usuario {
             joinColumns = @JoinColumn(name = "usuario_id"),
             inverseJoinColumns = @JoinColumn(name = "amigo_id")
     )
+    // Evita que al cargar un usuario se carguen infinitamente los amigos de sus amigos
+    @JsonIgnoreProperties({"amigos", "mascotas"})
     private List<Usuario> amigos = new ArrayList<>();
 }

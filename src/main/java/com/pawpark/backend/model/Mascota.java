@@ -22,13 +22,21 @@ public class Mascota {
     private Long id;
 
     private String nombre;
-    private String raza;
     private int edad;
     private String descripcion;
-    private String foto;
+    private String fotoPerfilMascota;
+    private String duenoFirebaseUid;
 
     @Enumerated(EnumType.STRING)
-    private Comportamiento comportamiento;
+    private Raza raza;
+
+    // Busca estas líneas en Mascota.java y sustitúyelas:
+    @ElementCollection(targetClass = Comportamiento.class)
+    @CollectionTable(name = "mascota_comportamientos", joinColumns = @JoinColumn(name = "mascota_id"))
+    @Column(name = "comportamiento")
+    @Enumerated(EnumType.STRING)
+    @Builder.Default // Necesario para que Lombok no ignore la inicialización al usar el Builder
+    private List<Comportamiento> comportamientos = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "usuario_id")

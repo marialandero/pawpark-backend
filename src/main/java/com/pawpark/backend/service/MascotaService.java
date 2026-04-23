@@ -32,8 +32,9 @@ public class MascotaService {
         mascota.setRaza(datos.getRaza());
         mascota.setEdad(datos.getEdad());
         mascota.setDescripcion(datos.getDescripcion());
-        mascota.setFoto(datos.getFoto());
-        mascota.setComportamiento(datos.getComportamiento());
+        mascota.setFotoPerfilMascota(datos.getFotoPerfilMascota());
+        mascota.setDuenoFirebaseUid(datos.getDuenoFirebaseUid());
+        mascota.setComportamientos(datos.getComportamientos());
         return mascotaRepository.save(mascota);
     }
 

@@ -7,5 +7,13 @@ public enum Comportamiento {
     JUGUETON,
     ENERGETICO,
     CARIÑOSO,
-    AVENTURERO
+    AVENTURERO,
+    MIEDOSO,
+    NERVIOSO,
+    INQUIETO,
+    OBEDIENTE,
+    GRUÑON,
+    SUMISO,
+    DOMINANTE,
+    GLOTON
 }

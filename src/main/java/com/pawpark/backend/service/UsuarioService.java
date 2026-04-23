@@ -37,6 +37,7 @@ public class UsuarioService {
         usuario.setNombre(datos.getNombre());
         usuario.setNickname(datos.getNickname());
         usuario.setEmail(datos.getEmail());
+        usuario.setDescripcion(datos.getDescripcion());
         usuario.setFotoPerfil(datos.getFotoPerfil());
         usuario.setLocalidad(datos.getLocalidad());
         usuario.setEncountersCount(datos.getEncountersCount());

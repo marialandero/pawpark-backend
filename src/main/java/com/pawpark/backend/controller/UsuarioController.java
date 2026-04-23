@@ -12,7 +12,9 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
-@CrossOrigin(origins = "*") // <-- ORIGEN para habilitar la conexión desde el frontend (Flutter)
+@CrossOrigin(origins = "*") /* <-- ORIGEN para habilitar la conexión desde el frontend (Flutter), es como la llave
+de paso que permite que el flujo de datos entre el frontend y el backend esté abierto y sin restricciones de seguridad
+de red durante las pruebas */
 @Tag(name = "Usuarios", description = "Operaciones relacionadas con los usuarios") // <-- TAG
 public class UsuarioController {
 
@@ -50,6 +52,18 @@ public class UsuarioController {
     @Operation(summary = "Actualizar un usuario", description = "Actualiza los datos de un usuario existente")
     public Usuario actualizarUsuario(@PathVariable Long id, @RequestBody Usuario datos) {
         return usuarioService.actualizarUsuario(id, datos);
+    }
+
+    @PutMapping("/firebase/{uid}")
+    @Operation(summary = "Actualizar usuario por Firebase UID", description = "Busca al usuario por su UID de Firebase y actualiza sus datos")
+    public ResponseEntity<Usuario> actualizarPorFirebaseUid(@PathVariable String uid, @RequestBody Usuario datos) {
+        return usuarioService.buscarPorFirebaseUid(uid)
+                .map(usuario -> {
+                    // Llamamos al servicio de actualización usando el ID real encontrado
+                    Usuario actualizado = usuarioService.actualizarUsuario(usuario.getId(), datos);
+                    return ResponseEntity.ok(actualizado);
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
