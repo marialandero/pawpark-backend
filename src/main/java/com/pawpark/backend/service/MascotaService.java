@@ -14,6 +14,9 @@ public class MascotaService {
     @Autowired
     private MascotaRepository mascotaRepository;
 
+    // 🐶 Imagen por defecto en backend (archivo real en /uploads)
+    private static final String DEFAULT_DOG_IMAGE = "dog_default.png";
+
     public List<Mascota> listarMascotas() {
         return mascotaRepository.findAll();
     }
@@ -22,19 +25,44 @@ public class MascotaService {
         return mascotaRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Mascota no encontrada"));
     }
 
+    // 🔥 CREAR MASCOTA con imagen por defecto controlada
     public Mascota crearMascota(Mascota mascota) {
+
+        String foto = mascota.getFotoPerfilMascota();
+
+        if (foto == null ||
+                foto.isBlank() ||
+                foto.startsWith("assets/") ||
+                foto.startsWith("http")) {
+
+            mascota.setFotoPerfilMascota(DEFAULT_DOG_IMAGE);
+        }
+
         return mascotaRepository.save(mascota);
     }
 
     public Mascota actualizarMascota(Long id, Mascota datos) {
         Mascota mascota = obtenerMascota(id);
+
         mascota.setNombre(datos.getNombre());
         mascota.setRaza(datos.getRaza());
         mascota.setEdad(datos.getEdad());
         mascota.setDescripcion(datos.getDescripcion());
-        mascota.setFotoPerfilMascota(datos.getFotoPerfilMascota());
         mascota.setDuenoFirebaseUid(datos.getDuenoFirebaseUid());
         mascota.setComportamientos(datos.getComportamientos());
+
+        // 🔥 misma normalización que en crear
+        String foto = datos.getFotoPerfilMascota();
+
+        if (foto != null &&
+                !foto.isBlank() &&
+                !foto.startsWith("assets/")) {
+
+            mascota.setFotoPerfilMascota(foto);
+        } else if (foto == null || foto.isBlank()) {
+            mascota.setFotoPerfilMascota(DEFAULT_DOG_IMAGE);
+        }
+
         return mascotaRepository.save(mascota);
     }
 

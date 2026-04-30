@@ -52,7 +52,7 @@ public class MascotaController {
         mascota.setRaza(Raza.valueOf(razaString));
 
         // Usamos lógica de 'comportamientos' en plural para coincidir con Flutter y el modelo
-        List<String> compStrings = (List<String>) payload.get("comportamiento");
+        List<String> compStrings = (List<String>) payload.get("comportamientos");
         if (compStrings != null) {
             List<Comportamiento> listaEnums = compStrings.stream()
                     .map(Comportamiento::valueOf)

@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -70,5 +71,28 @@ public class UsuarioController {
     @Operation(summary = "Eliminar un usuario", description = "Elimina un usuario según su ID")
     public void eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
+    }
+
+    /// 🔍 BUSCAR USUARIOS
+    @GetMapping("/buscar")
+    @Operation(summary = "Buscar usuarios", description = "Busca usuarios por su nombre")
+    public List<Usuario> buscarUsuarios(@RequestParam String query) {
+        return usuarioService.buscarPorNombre(query);
+    }
+
+    @PostMapping("/upload-foto/{uid}")
+    public ResponseEntity<String> subirFotoPerfil(
+            @PathVariable String uid,
+            @RequestParam("file") MultipartFile file
+    ) {
+        String nombreArchivo = usuarioService.guardarImagen(file);
+
+        Usuario usuario = usuarioService.buscarPorFirebaseUid(uid)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        usuario.setFotoPerfil(nombreArchivo);
+        usuarioService.crearUsuario(usuario);
+
+        return ResponseEntity.ok(nombreArchivo);
     }
 }

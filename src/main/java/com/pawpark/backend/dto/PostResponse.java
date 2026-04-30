@@ -16,6 +16,7 @@ public class PostResponse {
 
     private String autorNombre;
     private String autorUid;
+    private String autorFotoPerfil;
 
     private List<String> mascotasNombres;
 }
