@@ -43,4 +43,6 @@ public class Post {
     )
     @JsonIgnoreProperties({"dueno", "posts"})
     private List<Mascota> mascotasEtiquetadas = new ArrayList<>();
+
+    
 }

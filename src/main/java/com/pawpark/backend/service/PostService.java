@@ -77,7 +77,7 @@ public class PostService {
     }
 
     public List<PostResponse> getByMascota(Long id) {
-        return postRepository.findByMascotasEtiquetadasIdOrderByFechaCreacionDesc(id)
+        return postRepository.findByMascotaId(id)
                 .stream()
                 .map(this::mapToResponse)
                 .toList();
@@ -121,5 +121,9 @@ public class PostService {
         } catch (IOException e) {
             throw new RuntimeException("No se pudo guardar la imagen: " + e.getMessage());
         }
+    }
+
+    public List<Post> obtenerPostsPorMascota(Long mascotaId) {
+        return postRepository.findByMascotaId(mascotaId);
     }
 }

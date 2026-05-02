@@ -91,7 +91,8 @@ public class UsuarioController {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         usuario.setFotoPerfil(nombreArchivo);
-        usuarioService.crearUsuario(usuario);
+
+        usuarioService.actualizarUsuario(usuario.getId(), usuario);
 
         return ResponseEntity.ok(nombreArchivo);
     }

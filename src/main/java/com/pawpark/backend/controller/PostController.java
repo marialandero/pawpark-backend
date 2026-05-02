@@ -1,6 +1,7 @@
 package com.pawpark.backend.controller;
 
 import com.pawpark.backend.dto.PostResponse;
+import com.pawpark.backend.model.Post;
 import com.pawpark.backend.service.PostService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;

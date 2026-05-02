@@ -69,13 +69,13 @@ public class MascotaController {
     @GetMapping
     @Operation(summary = "Listar todas las mascotas", description = "Devuelve la lista completa de mascotas")
     public List<Mascota> listarMascotas() {
-        return  mascotaService.listarMascotas();
+        return mascotaService.listarMascotas();
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtener una mascota", description = "Devuelve una mascota según su ID")
     public Mascota obtenerMascota(@PathVariable Long id) {
-        return  mascotaService.obtenerMascota(id);
+        return mascotaService.obtenerMascota(id);
     }
 
 
@@ -87,8 +87,9 @@ public class MascotaController {
 
     @PutMapping("/{id}/descripcion")
     @Operation(summary = "Actualizar solo la descripción", description = "Actualiza la descripción y devuelve la mascota completa")
-    public ResponseEntity<Mascota> actualizarDescripcion(@PathVariable Long id, @RequestBody String nuevaDesc) {
+    public ResponseEntity<Mascota> actualizarDescripcion(@PathVariable Long id, @RequestBody Map<String, String> body) {
         try {
+            String nuevaDesc = body.get("descripcion");
             // Obtenemos la mascota actual usando el service
             Mascota mascota = mascotaService.obtenerMascota(id);
             // Modificamos el campo
@@ -96,11 +97,13 @@ public class MascotaController {
             // Guardamos los cambios usando el service
             // (El service ya devuelve la mascota guardada)
             Mascota actualizada = mascotaService.actualizarMascota(id, mascota);
+
             return ResponseEntity.ok(actualizada);
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }
     }
+
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Eliminar una mascota", description = "Elimina una mascota según su ID")
@@ -108,5 +111,23 @@ public class MascotaController {
         mascotaService.eliminarMascota(id);
     }
 
+    @PutMapping("/{id}/foto")
+    @Operation(summary = "Actualizar foto de mascota", description = "Actualiza solo la imagen de perfil de una mascota")
+    public ResponseEntity<Mascota> actualizarFotoMascota(@PathVariable Long id, @RequestBody Map<String, String> body) {
 
+        try {
+            Mascota mascota = mascotaService.obtenerMascota(id);
+
+            String foto = body.get("fotoPerfilMascota");
+
+            if (foto != null && !foto.isBlank()) {
+                mascota.setFotoPerfilMascota(foto);
+            }
+
+            return ResponseEntity.ok(mascotaService.actualizarMascota(id, mascota));
+
+        } catch (Exception e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

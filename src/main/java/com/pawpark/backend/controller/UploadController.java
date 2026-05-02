@@ -32,8 +32,7 @@ public class UploadController {
 
             Files.copy(file.getInputStream(), filePath);
 
-            // URL accesible desde Flutter
-            return "http://10.0.2.2:8081/uploads/" + fileName;
+            return fileName;
 
         } catch (IOException e) {
             throw new RuntimeException("Error subiendo imagen");
