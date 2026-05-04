@@ -57,6 +57,8 @@ public class MascotaService {
     }
 
     public void eliminarMascota(Long id) {
-        mascotaRepository.deleteById(id);
+        Mascota mascota = mascotaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No existe"));
+        mascotaRepository.delete(mascota);
     }
 }

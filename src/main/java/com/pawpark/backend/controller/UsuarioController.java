@@ -16,51 +16,52 @@ import java.util.List;
 @CrossOrigin(origins = "*") /* <-- ORIGEN para habilitar la conexión desde el frontend (Flutter), es como la llave
 de paso que permite que el flujo de datos entre el frontend y el backend esté abierto y sin restricciones de seguridad
 de red durante las pruebas */
-@Tag(name = "Usuarios", description = "Operaciones relacionadas con los usuarios") // <-- TAG
+@Tag(name = "Usuarios", description = "Operaciones relacionadas con la gestión de perfiles de usuario y autenticación vinculada a Firebase")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
     @GetMapping
-    @Operation(summary = "Listar todos los usuarios", description = "Devuelve la lista completa de usuarios")
+    @Operation(summary = "Listar todos los usuarios", description = "Devuelve la lista completa de los usuarios registrados en el sistema")
     public List<Usuario> listarUsuarios() {
         return usuarioService.listarUsuarios();
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener un usuario", description = "Devuelve un usuario según su ID")
+    @Operation(summary = "Obtener un usuario por ID", description = "Busca y devuelve los datos de un usuario mediante su clave primaria (ID)")
     public Usuario obtenerUsuario(@PathVariable Long id) {
         return usuarioService.obtenerUsuario(id);
     }
 
     @GetMapping("/firebase/{uid}")
-    @Operation(summary = "Obtener por Firebase UID", description = "Busca los datos de MySQL usando el ID de Firebase")
+    @Operation(summary = "Obtener por Firebase UID", description = "Endpoint crítico para el login: recupera el perfil de usuario de MySQL usando el identificador único de Firebase")
     public ResponseEntity<Usuario> obtenerPorFirebaseUid(@PathVariable String uid) {
-        // Este método sirve para que, al hacer login, Flutter pida los datos de este usuario
+        /* Este método sirve para que, al hacer login, Flutter pida los datos de este usuario, es decir
+        * sincroniza la sesión de Firebase Auth con los datos de perfil de nuestra DB */
         return usuarioService.buscarPorFirebaseUid(uid)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    @Operation(summary = "Crear un usuario", description = "Crea un nuevo usuario en la base de datos")
+    @Operation(summary = "Crear un usuario", description = "Registra un nuevo usuario en el sistema")
     public Usuario crearUsuario(@RequestBody Usuario usuario) {
         return usuarioService.crearUsuario(usuario);
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Actualizar un usuario", description = "Actualiza los datos de un usuario existente")
+    @Operation(summary = "Actualizar un usuario", description = "Modifica los datos de un perfil existente mediante su ID")
     public Usuario actualizarUsuario(@PathVariable Long id, @RequestBody Usuario datos) {
         return usuarioService.actualizarUsuario(id, datos);
     }
 
     @PutMapping("/firebase/{uid}")
-    @Operation(summary = "Actualizar usuario por Firebase UID", description = "Busca al usuario por su UID de Firebase y actualiza sus datos")
+    @Operation(summary = "Actualizar perfil por Firebase UID", description = "Permite al usuario editar su perfil identificándolo mediante su sesión activa de Firebase")
     public ResponseEntity<Usuario> actualizarPorFirebaseUid(@PathVariable String uid, @RequestBody Usuario datos) {
         return usuarioService.buscarPorFirebaseUid(uid)
                 .map(usuario -> {
-                    // Llamamos al servicio de actualización usando el ID real encontrado
+                    // Mapeamos el UID al ID interno de MySQL para realizar la persistencia
                     Usuario actualizado = usuarioService.actualizarUsuario(usuario.getId(), datos);
                     return ResponseEntity.ok(actualizado);
                 })
@@ -68,30 +69,33 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar un usuario", description = "Elimina un usuario según su ID")
+    @Operation(summary = "Eliminar un usuario", description = "Borra permanentemente el perfil de un usuario del sistema")
     public void eliminarUsuario(@PathVariable Long id) {
         usuarioService.eliminarUsuario(id);
     }
 
-    /// 🔍 BUSCAR USUARIOS
+    // BÚSQUEDA Y MULTIMEDIA
+
     @GetMapping("/buscar")
-    @Operation(summary = "Buscar usuarios", description = "Busca usuarios por su nombre")
+    @Operation(summary = "Buscar usuarios por nombre", description = "Permite buscar perfiles de otros dueños de mascotas mediante una consulta de texto")
     public List<Usuario> buscarUsuarios(@RequestParam String query) {
         return usuarioService.buscarPorNombre(query);
     }
 
     @PostMapping("/upload-foto/{uid}")
+    @Operation(summary = "Subir foto de perfil", description = "Procesa y almacena la imagen de perfil del usuario vinculándola a su UID")
     public ResponseEntity<String> subirFotoPerfil(
             @PathVariable String uid,
             @RequestParam("file") MultipartFile file
     ) {
+        // Guardamos el archivo físicamente o en el servicio de almacenamiento
         String nombreArchivo = usuarioService.guardarImagen(file);
 
         Usuario usuario = usuarioService.buscarPorFirebaseUid(uid)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
+        // Actualizamos la referencia de la imagen en la base de datos
         usuario.setFotoPerfil(nombreArchivo);
-
         usuarioService.actualizarUsuario(usuario.getId(), usuario);
 
         return ResponseEntity.ok(nombreArchivo);

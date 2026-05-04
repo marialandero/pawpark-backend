@@ -19,11 +19,14 @@ public class QuedadaService {
     @Autowired
     private MascotaRepository mascotaRepository;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     public List<Quedada> listarTodas() {
         return quedadaRepository.findAllByOrderByFechaHoraAsc();
     }
 
-    public Quedada crearQuedada(Quedada quedada) {
+    public Quedada procesarYCrearQuedada(Quedada quedada) {
         return quedadaRepository.save(quedada);
     }
 

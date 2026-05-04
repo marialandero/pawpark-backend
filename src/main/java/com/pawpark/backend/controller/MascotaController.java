@@ -20,7 +20,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*") /* <-- ORIGEN para habilitar la conexión desde el frontend (Flutter), es como la llave
 de paso que permite que el flujo de datos entre el frontend y el backend esté abierto y sin restricciones de seguridad
 de red durante las pruebas */
-@Tag(name = "Mascotas", description = "Operaciones relacionadas con las mascotas")
+@Tag(name = "Mascotas", description = "Operaciones de gestión de mascotas, incluyendo vinculación con dueños y gestión de perfiles")
 public class MascotaController {
 
     @Autowired
@@ -33,25 +33,25 @@ public class MascotaController {
     @Operation(summary = "Crear una mascota vinculada a un usuario")
     public Mascota crearMascota(@RequestBody Map<String, Object> payload) {
 
-        // Extraemos el UID que viene de Flutter
+        // Extraemos el identificador único que viene de la sesión de Flutter
         String firebaseUid = (String) payload.get("duenoFirebaseUid");
 
-        // Buscamos al usuario real (Usamos UsuarioService y guardamos en Usuario)
+        // Validación de existencia del dueño en la base de datos relacional
         Usuario dueno = usuarioService.buscarPorFirebaseUid(firebaseUid)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con UID: " + firebaseUid));
 
-        // Creamos el objeto Mascota manualmente con los datos del JSON
+        // Mapeo manual del objeto Mascota con los datos del JSON para asegurar la integridad de los tipos de datos
         Mascota mascota = new Mascota();
         mascota.setNombre((String) payload.get("nombre"));
         mascota.setEdad((Integer) payload.get("edad"));
         mascota.setFotoPerfilMascota((String) payload.get("fotoPerfilMascota"));
         mascota.setDuenoFirebaseUid(firebaseUid); // Guardamos el UID también como String para el frontend
 
-        // Convertimos el String de la raza al Enum
+        // Conversión segura de tipos: String de la solicitud al tipo Raza (Enum)
         String razaString = (String) payload.get("raza");
         mascota.setRaza(Raza.valueOf(razaString));
 
-        // Usamos lógica de 'comportamientos' en plural para coincidir con Flutter y el modelo
+        // Procesamiento de comportamientos: conversión de lista de Strings a lista de Enums
         List<String> compStrings = (List<String>) payload.get("comportamientos");
         if (compStrings != null) {
             List<Comportamiento> listaEnums = compStrings.stream()
@@ -60,33 +60,33 @@ public class MascotaController {
             mascota.setComportamientos(listaEnums);
         }
 
-        // Vinculamos al dueño
+        // Establecimiento de la relación bidireccional en el modelo (vinculamos al dueño)
         mascota.setDueno(dueno);
 
         return mascotaService.crearMascota(mascota);
     }
 
     @GetMapping
-    @Operation(summary = "Listar todas las mascotas", description = "Devuelve la lista completa de mascotas")
+    @Operation(summary = "Listar todas las mascotas", description = "Devuelve la lista completa de mascotas registradas")
     public List<Mascota> listarMascotas() {
         return mascotaService.listarMascotas();
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Obtener una mascota", description = "Devuelve una mascota según su ID")
+    @Operation(summary = "Obtener una mascota por ID", description = "Recupera la ficha completa de una mascota específica")
     public Mascota obtenerMascota(@PathVariable Long id) {
         return mascotaService.obtenerMascota(id);
     }
 
 
     @PutMapping("/{id}")
-    @Operation(summary = "Actualizar una mascota", description = "Actualiza los datos de una mascota existente")
+    @Operation(summary = "Actualizar una mascota", description = "Permite la modificación integral de los datos de una mascota")
     public Mascota actualizarMascota(@PathVariable Long id, @RequestBody Mascota datos) {
         return mascotaService.actualizarMascota(id, datos);
     }
 
     @PutMapping("/{id}/descripcion")
-    @Operation(summary = "Actualizar solo la descripción", description = "Actualiza la descripción y devuelve la mascota completa")
+    @Operation(summary = "Actualizar biografía", description = "Endpoint optimizado para modificar exclusivamente la descripción de la mascota")
     public ResponseEntity<Mascota> actualizarDescripcion(@PathVariable Long id, @RequestBody Map<String, String> body) {
         try {
             String nuevaDesc = body.get("descripcion");
@@ -106,26 +106,22 @@ public class MascotaController {
 
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar una mascota", description = "Elimina una mascota según su ID")
+    @Operation(summary = "Eliminar una mascota", description = "Elimina el registro de una mascota según su ID")
     public void eliminarMascota(@PathVariable Long id) {
         mascotaService.eliminarMascota(id);
     }
 
     @PutMapping("/{id}/foto")
-    @Operation(summary = "Actualizar foto de mascota", description = "Actualiza solo la imagen de perfil de una mascota")
+    @Operation(summary = "Actualizar imagen de perfil", description = "Modifica la referencia de la fotografía de la mascota en el sistema")
     public ResponseEntity<Mascota> actualizarFotoMascota(@PathVariable Long id, @RequestBody Map<String, String> body) {
 
         try {
             Mascota mascota = mascotaService.obtenerMascota(id);
-
             String foto = body.get("fotoPerfilMascota");
-
             if (foto != null && !foto.isBlank()) {
                 mascota.setFotoPerfilMascota(foto);
             }
-
             return ResponseEntity.ok(mascotaService.actualizarMascota(id, mascota));
-
         } catch (Exception e) {
             return ResponseEntity.notFound().build();
         }

@@ -13,20 +13,31 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class EstanciaParque {
+public class CheckIn {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    // Relación con el usuario que hace el check-in
+    @ManyToOne
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "mascota_id")
     private Mascota mascota;
 
     @ManyToOne
-    @JoinColumn(name = "parque_id")
-    private Parque parque;
+    @JoinColumn(name = "zona_id")
+    private Zona zona;
 
     private LocalDateTime fechaEntrada;
-    private LocalDateTime fechaSalida; // null si sigue en el parque
+
+    /**
+     * Sustituimos fechaSalida por fechaExpiracion.
+     * Esto permite que el backend "limpie" automáticamente el mapa
+     * sin que el usuario tenga que marcar manualmente que se ha ido.
+     */
+    private LocalDateTime fechaExpiracion;
 }
