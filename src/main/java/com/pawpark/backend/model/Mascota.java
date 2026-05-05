@@ -30,7 +30,6 @@ public class Mascota {
     @Enumerated(EnumType.STRING)
     private Raza raza;
 
-    // Busca estas líneas en Mascota.java y sustitúyelas:
     @ElementCollection(targetClass = Comportamiento.class)
     @CollectionTable(name = "mascota_comportamientos", joinColumns = @JoinColumn(name = "mascota_id"))
     @Column(name = "comportamiento")

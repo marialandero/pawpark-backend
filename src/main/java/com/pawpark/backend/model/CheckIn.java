@@ -19,6 +19,15 @@ public class CheckIn {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private LocalDateTime fechaEntrada;
+
+    /**
+     * Sustituimos fechaSalida por fechaExpiracion.
+     * Esto permite que el backend "limpie" automáticamente el mapa
+     * sin que el usuario tenga que marcar manualmente que se ha ido.
+     */
+    private LocalDateTime fechaExpiracion;
+
     // Relación con el usuario que hace el check-in
     @ManyToOne
     @JoinColumn(name = "usuario_id")
@@ -32,12 +41,5 @@ public class CheckIn {
     @JoinColumn(name = "zona_id")
     private Zona zona;
 
-    private LocalDateTime fechaEntrada;
 
-    /**
-     * Sustituimos fechaSalida por fechaExpiracion.
-     * Esto permite que el backend "limpie" automáticamente el mapa
-     * sin que el usuario tenga que marcar manualmente que se ha ido.
-     */
-    private LocalDateTime fechaExpiracion;
 }

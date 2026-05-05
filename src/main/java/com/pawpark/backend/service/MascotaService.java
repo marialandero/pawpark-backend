@@ -2,7 +2,9 @@ package com.pawpark.backend.service;
 
 import com.pawpark.backend.exception.RecursoNoEncontradoException;
 import com.pawpark.backend.model.Mascota;
+import com.pawpark.backend.model.Usuario;
 import com.pawpark.backend.repository.MascotaRepository;
+import com.pawpark.backend.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +15,8 @@ public class MascotaService {
 
     @Autowired
     private MascotaRepository mascotaRepository;
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     // Imagen por defecto en backend (archivo real en /uploads)
     private static final String DEFAULT_DOG_IMAGE = "dog_default.png";
@@ -28,8 +32,8 @@ public class MascotaService {
     // Crear mascota con imagen por defecto controlada
     public Mascota crearMascota(Mascota mascota) {
 
+        // 2. Control de imagen por defecto
         String foto = mascota.getFotoPerfilMascota();
-
         if (foto == null || foto.isBlank()) {
             mascota.setFotoPerfilMascota(DEFAULT_DOG_IMAGE);
         }

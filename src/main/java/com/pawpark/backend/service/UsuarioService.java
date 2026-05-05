@@ -20,7 +20,7 @@ public class UsuarioService {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
-    // 📌 Imagen por defecto (solo nombre de archivo, NO ruta completa)
+    // Imagen por defecto (solo nombre de archivo, NO ruta completa)
     private static final String DEFAULT_FOTO = "person_default.png";
 
     public List<Usuario> listarUsuarios() {
@@ -36,12 +36,12 @@ public class UsuarioService {
         return usuarioRepository.findByFirebaseUid(uid);
     }
 
-    // 🔥 CREAR USUARIO CON FOTO POR DEFECTO CONTROLADA
+    // CREAR USUARIO CON FOTO POR DEFECTO CONTROLADA
     public Usuario crearUsuario(Usuario usuario) {
 
         String foto = usuario.getFotoPerfil();
 
-        // 🚨 Normalización de foto de perfil
+        // Normalización de foto de perfil
         if (foto == null ||
                 foto.isBlank() ||
                 foto.startsWith("assets/") ||
