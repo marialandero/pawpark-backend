@@ -36,19 +36,39 @@ public class Usuario {
     private String memberSince;
     private int encountersCount;
 
-    // Mascotas del usuario
+    // Mascotas propias del usuario
     @OneToMany(mappedBy = "dueno", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("dueno")
     private List<Mascota> mascotas = new ArrayList<>();
 
-    // Amigos (otros usuarios)
+    // Relación obtener la lista de publicaciones
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL)
+    @JsonIgnoreProperties("autor")
+    private List<Post> posts = new ArrayList<>();
+
+    // Sistema de Seguidores (Sustituye a "Amigos")
+    // Esta lista representa a quién sigue este usuario (unidireccional)
     @ManyToMany
     @JoinTable(
-            name = "amistad_usuario",
-            joinColumns = @JoinColumn(name = "usuario_id"),
-            inverseJoinColumns = @JoinColumn(name = "amigo_id")
+            name = "usuario_siguiendo",
+            joinColumns = @JoinColumn(name = "seguidor_id"),
+            inverseJoinColumns = @JoinColumn(name = "seguido_id")
     )
-    // Evita que al cargar un usuario se carguen infinitamente los amigos de sus amigos
-    @JsonIgnoreProperties({"amigos", "mascotas"})
-    private List<Usuario> amigos = new ArrayList<>();
+    @JsonIgnoreProperties({"siguiendo", "seguidores", "mascotas", "mascotasFavoritas"})
+    private List<Usuario> siguiendo = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "siguiendo")
+    @JsonIgnoreProperties({"siguiendo", "seguidores", "mascotas", "mascotasFavoritas"})
+    private List<Usuario> seguidores = new ArrayList<>();
+
+    // Sistema de Mascotas Favoritas
+    // Permite al usuario marcar perros específicos para darles prioridad en el mapa[cite: 1]
+    @ManyToMany
+    @JoinTable(
+            name = "usuario_mascotas_favoritas",
+            joinColumns = @JoinColumn(name = "usuario_id"),
+            inverseJoinColumns = @JoinColumn(name = "mascota_id")
+    )
+    @JsonIgnoreProperties("dueno")
+    private List<Mascota> mascotasFavoritas = new ArrayList<>();
 }

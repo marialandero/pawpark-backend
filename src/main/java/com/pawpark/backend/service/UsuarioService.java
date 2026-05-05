@@ -1,8 +1,11 @@
 package com.pawpark.backend.service;
 
 import com.pawpark.backend.exception.RecursoNoEncontradoException;
+import com.pawpark.backend.model.Mascota;
 import com.pawpark.backend.model.Usuario;
+import com.pawpark.backend.repository.MascotaRepository;
 import com.pawpark.backend.repository.UsuarioRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +22,9 @@ public class UsuarioService {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private MascotaRepository mascotaRepository;
 
     // Imagen por defecto (solo nombre de archivo, NO ruta completa)
     private static final String DEFAULT_FOTO = "person_default.png";
@@ -70,6 +76,38 @@ public class UsuarioService {
             usuario.setFotoPerfil(foto);
         }
         return usuarioRepository.save(usuario);
+    }
+
+    // --- LÓGICA DE SEGUIDORES Y FAVORITOS ---
+
+    @Transactional
+    public void alternarSeguimiento(String seguidorUid, String seguidoUid) {
+        Usuario seguidor = buscarPorFirebaseUid(seguidorUid)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Seguidor no encontrado"));
+        Usuario seguido = buscarPorFirebaseUid(seguidoUid)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario a seguir no encontrado"));
+
+        if (seguidor.getSiguiendo().contains(seguido)) {
+            seguidor.getSiguiendo().remove(seguido);
+        } else {
+            seguidor.getSiguiendo().add(seguido);
+        }
+        usuarioRepository.save(seguidor);
+    }
+
+    @Transactional
+    public void alternarMascotaFavorita(String usuarioUid, Long mascotaId) {
+        Usuario usuario = buscarPorFirebaseUid(usuarioUid)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        Mascota mascota = mascotaRepository.findById(mascotaId)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Mascota no encontrada"));
+
+        if (usuario.getMascotasFavoritas().contains(mascota)) {
+            usuario.getMascotasFavoritas().remove(mascota);
+        } else {
+            usuario.getMascotasFavoritas().add(mascota);
+        }
+        usuarioRepository.save(usuario);
     }
 
     public void eliminarUsuario(Long id) {

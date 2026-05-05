@@ -100,4 +100,22 @@ public class UsuarioController {
 
         return ResponseEntity.ok(nombreArchivo);
     }
+
+    @PostMapping("/{seguidorUid}/seguir/{seguidoUid}")
+    @Operation(summary = "Alternar seguimiento", description = "Permite a un usuario seguir o dejar de seguir a otro mediante sus Firebase UIDs")
+    public ResponseEntity<Void> alternarSeguimiento(
+            @PathVariable String seguidorUid,
+            @PathVariable String seguidoUid) {
+        usuarioService.alternarSeguimiento(seguidorUid, seguidoUid);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{uid}/favorito/{mascotaId}")
+    @Operation(summary = "Alternar mascota favorita", description = "Añade o elimina una mascota de la lista de favoritos del usuario")
+    public ResponseEntity<Void> alternarMascotaFavorita(
+            @PathVariable String uid,
+            @PathVariable Long mascotaId) {
+        usuarioService.alternarMascotaFavorita(uid, mascotaId);
+        return ResponseEntity.ok().build();
+    }
 }
