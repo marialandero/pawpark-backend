@@ -85,24 +85,29 @@ public class MascotaController {
         return mascotaService.actualizarMascota(id, datos);
     }
 
-    @PutMapping("/{id}/descripcion")
-    @Operation(summary = "Actualizar biografía", description = "Endpoint optimizado para modificar exclusivamente la descripción de la mascota")
-    public ResponseEntity<Mascota> actualizarDescripcion(@PathVariable Long id, @RequestBody Map<String, String> body) {
+    @PutMapping("/{id}/perfil")
+    @Operation(summary = "Actualizar biografía y edad", description = "Endpoint para modificar la descripción y la edad de la mascota simultáneamente")
+    public ResponseEntity<Mascota> actualizarPerfil(@PathVariable Long id, @RequestBody Map<String, Object> body) {
         try {
-            String nuevaDesc = body.get("descripcion");
-            // Obtenemos la mascota actual usando el service
-            Mascota mascota = mascotaService.obtenerMascota(id);
-            // Modificamos el campo
-            mascota.setDescripcion(nuevaDesc);
-            // Guardamos los cambios usando el service
-            // (El service ya devuelve la mascota guardada)
-            Mascota actualizada = mascotaService.actualizarMascota(id, mascota);
+            // Extraemos los datos del Map de forma segura
+            String nuevaDesc = (String) body.get("descripcion");
+
+            // La edad puede venir como Integer o Double dependiendo de la librería JSON,
+            // lo convertimos a Integer de forma segura
+            Integer nuevaEdad = null;
+            if (body.get("edad") != null) {
+                nuevaEdad = ((Number) body.get("edad")).intValue();
+            }
+
+            // Llamamos al nuevo método del servicio
+            Mascota actualizada = mascotaService.actualizarPerfil(id, nuevaDesc, nuevaEdad);
 
             return ResponseEntity.ok(actualizada);
         } catch (Exception e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(null);
         }
     }
+
 
 
     @DeleteMapping("/{id}")

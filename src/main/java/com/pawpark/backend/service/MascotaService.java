@@ -60,6 +60,20 @@ public class MascotaService {
         return mascotaRepository.save(mascota);
     }
 
+    public Mascota actualizarPerfil(Long id, String descripcion, Integer edad) {
+        Mascota mascota = obtenerMascota(id); // Reutiliza tu método que lanza excepción si no existe
+
+        if (descripcion != null) {
+            mascota.setDescripcion(descripcion);
+        }
+
+        if (edad != null) {
+            mascota.setEdad(edad);
+        }
+
+        return mascotaRepository.save(mascota);
+    }
+
     public void eliminarMascota(Long id) {
         Mascota mascota = mascotaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No existe"));
