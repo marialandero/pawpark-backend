@@ -35,30 +35,23 @@ public class QuedadaController {
     }
 
     @PostMapping
-    @Operation(summary = "Organizar una quedada", description = "Crea un nuevo evento vinculando al creador y parseando la fecha enviada desde Flutter.")
+    @Operation(summary = "Organizar una quedada", description = "Crea un nuevo evento vinculando al creador y sus mascotas.")
     public Quedada crear(@RequestBody Map<String, Object> payload) {
-        // Identificamos al creador mediante su UID de Firebase
-        String firebaseUid = (String) payload.get("creadorUid");
-        Usuario creador = usuarioService.buscarPorFirebaseUid(firebaseUid)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        // Extraemos los datos básicos del mapa
+        String creadorUid = (String) payload.get("creadorUid");
+        String titulo = (String) payload.get("titulo");
+        String descripcion = (String) payload.get("descripcion");
+        String lugarNombre = (String) payload.get("lugarNombre");
+        String fechaHoraStr = (String) payload.get("fechaHora");
 
-        // Construcción manual de la entidad Quedada para asegurar el mapeo de tipos
-        Quedada quedada = new Quedada();
-        quedada.setTitulo((String) payload.get("titulo"));
-        quedada.setDescripcion((String) payload.get("descripcion"));
-        quedada.setLugarNombre((String) payload.get("lugarNombre"));
-        // La fecha se recibe en formato String ISO y se convierte a LocalDateTime de Java
-        quedada.setFechaHora(LocalDateTime.parse((String) payload.get("fechaHora")));
-        quedada.setCreador(creador);
+        // Extraemos la lista de IDs de mascotas (opcional)
+        List<Integer> mascotasIdsInt = (List<Integer>) payload.get("mascotasIds");
+        List<Long> mascotasIds = (mascotasIdsInt != null)
+                ? mascotasIdsInt.stream().map(Integer::longValue).toList()
+                : new ArrayList<>();
 
-        // Inicialización de la lista de asistentes para evitar NullPointerException
-        if(quedada.getUsuariosAsistentes() == null) {
-            quedada.setUsuariosAsistentes(new ArrayList<>());
-        }
-        // El creador es automáticamente el primer asistente
-        quedada.getUsuariosAsistentes().add(creador);
-
-        return quedadaService.procesarYCrearQuedada(quedada);
+        // Dejamos que el service haga todo el trabajo sucio
+        return quedadaService.crearQuedadaCompleta(creadorUid, titulo, descripcion, lugarNombre, fechaHoraStr, mascotasIds);
     }
 
     @PostMapping("/{id}/unirse")
