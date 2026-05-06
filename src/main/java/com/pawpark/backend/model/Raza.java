@@ -25,6 +25,8 @@ public enum Raza {
     COCKER_SPANIEL,
     SETTER_IRLANDES,
     BRETON,
+    TECKEL,
+    DACSHUND,
 
     CANE_CORSO,
     GOLDEN_RETRIEVER,
