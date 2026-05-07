@@ -63,5 +63,4 @@ public class PostController {
     public List<PostResponse> obtenerPorMascota(@PathVariable Long id, @PathVariable String usuarioActualUid) {
         return postService.getByMascota(id, usuarioActualUid);
     }
-
 }
