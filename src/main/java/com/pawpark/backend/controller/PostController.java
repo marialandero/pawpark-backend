@@ -31,30 +31,37 @@ public class PostController {
         return postService.crearPost(payload);
     }
 
-    @GetMapping("/feed")
+
+    @PostMapping("/{postId}/like/{usuarioUid}")
+    @Operation(summary = "Alternar like (dar/quitar)")
+    public ResponseEntity<Void> toggleLike(@PathVariable Long postId, @PathVariable String usuarioUid) {
+        postService.toggleLike(postId, usuarioUid);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar un post propio")
+    public ResponseEntity<Void> eliminarPost(@PathVariable Long id) {
+        postService.eliminarPost(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/feed/{usuarioUid}")
     @Operation(summary = "Obtener feed global", description = "Recupera todas las publicaciones del sistema en formato PostResponse para visualización en el muro principal.")
-    public List<PostResponse> obtenerFeed() {
-        return postService.getFeed();
+    public List<PostResponse> obtenerFeed(@PathVariable String usuarioUid) {
+        return postService.getFeed(usuarioUid);
     }
 
-    @GetMapping("/usuario/{uid}")
+    @GetMapping("/usuario/{uid}/{usuarioActualUid}")
     @Operation(summary = "Obtener posts de un usuario", description = "Filtra y devuelve las publicaciones realizadas por un dueño específico mediante su Firebase UID.")
-    public List<PostResponse> obtenerPorUsuario(@PathVariable String uid) {
-        return postService.getByUsuario(uid);
+    public List<PostResponse> obtenerPorUsuario(@PathVariable String uid, @PathVariable String usuarioActualUid) {
+        return postService.getByUsuario(uid, usuarioActualUid);
     }
 
-    @GetMapping("/mascota/{id}")
+    @GetMapping("/mascota/{id}/{usuarioActualUid}")
     @Operation(summary = "Obtener posts de una mascota", description = "Recupera las publicaciones donde una mascota específica ha sido etiquetada.")
-    public List<PostResponse> obtenerPorMascota(@PathVariable Long id) {
-        return postService.getByMascota(id);
+    public List<PostResponse> obtenerPorMascota(@PathVariable Long id, @PathVariable String usuarioActualUid) {
+        return postService.getByMascota(id, usuarioActualUid);
     }
 
-    @PostMapping("/upload")
-    @Operation(summary = "Subir imagen de publicación", description = "Procesa un archivo multimedia (MultipartFile) y retorna el nombre único generado para almacenarlo en la base de datos.")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        /* El controlador gestiona la entrada del flujo binario y el servicio
-           se encarga de la persistencia física en el servidor o storage. */
-        String nombreImagen = postService.guardarImagen(file);
-        return ResponseEntity.ok(nombreImagen);
-    }
 }

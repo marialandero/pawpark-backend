@@ -24,7 +24,10 @@ public class Mascota {
     private String nombre;
     private int edad;
     private String descripcion;
+
+    @Column(length = 500) // Ampliamos para la URL de Firebase
     private String fotoPerfilMascota;
+
     private String duenoFirebaseUid;
 
     @Enumerated(EnumType.STRING)

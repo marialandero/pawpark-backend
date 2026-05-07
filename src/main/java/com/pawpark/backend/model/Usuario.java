@@ -31,7 +31,9 @@ public class Usuario {
     @Column(columnDefinition = "TEXT")
     private String descripcion;
 
+    @Column(length = 500) // Ampliamos para la URL de Firebase
     private String fotoPerfil;
+
     private String localidad;
     private String memberSince;
     private int encountersCount;

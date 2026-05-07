@@ -15,8 +15,12 @@ public class PostResponse {
     private LocalDateTime fechaCreacion;
 
     private String autorNombre;
+    private String autorNickname;
     private String autorUid;
     private String autorFotoPerfil;
 
     private List<String> mascotasNombres;
+
+    private int likes;
+    private boolean liked;
 }

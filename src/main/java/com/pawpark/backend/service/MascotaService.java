@@ -19,7 +19,7 @@ public class MascotaService {
     private UsuarioRepository usuarioRepository;
 
     // Imagen por defecto en backend (archivo real en /uploads)
-    private static final String DEFAULT_DOG_IMAGE = "dog_default.png";
+    private static final String DEFAULT_DOG_IMAGE = "https://firebasestorage.googleapis.com/v0/b/pawpark-26b38.firebasestorage.app/o/dog_default.png?alt=media&token=61f37e02-5c11-4456-ae75-2af2132c1813";
 
     public List<Mascota> listarMascotas() {
         return mascotaRepository.findAll();

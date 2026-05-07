@@ -82,25 +82,6 @@ public class UsuarioController {
         return usuarioService.buscarPorNombre(query);
     }
 
-    @PostMapping("/upload-foto/{uid}")
-    @Operation(summary = "Subir foto de perfil", description = "Procesa y almacena la imagen de perfil del usuario vinculándola a su UID")
-    public ResponseEntity<String> subirFotoPerfil(
-            @PathVariable String uid,
-            @RequestParam("file") MultipartFile file
-    ) {
-        // Guardamos el archivo físicamente o en el servicio de almacenamiento
-        String nombreArchivo = usuarioService.guardarImagen(file);
-
-        Usuario usuario = usuarioService.buscarPorFirebaseUid(uid)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // Actualizamos la referencia de la imagen en la base de datos
-        usuario.setFotoPerfil(nombreArchivo);
-        usuarioService.actualizarUsuario(usuario.getId(), usuario);
-
-        return ResponseEntity.ok(nombreArchivo);
-    }
-
     @PostMapping("/{seguidorUid}/seguir/{seguidoUid}")
     @Operation(summary = "Alternar seguimiento", description = "Permite a un usuario seguir o dejar de seguir a otro mediante sus Firebase UIDs")
     public ResponseEntity<Void> alternarSeguimiento(

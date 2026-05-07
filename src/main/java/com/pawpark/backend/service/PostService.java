@@ -7,6 +7,7 @@ import com.pawpark.backend.model.Usuario;
 import com.pawpark.backend.repository.PostRepository;
 import com.pawpark.backend.service.MascotaService;
 import com.pawpark.backend.service.UsuarioService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -33,21 +34,17 @@ public class PostService {
         this.postRepository = postRepository;
     }
 
+    @Transactional
     public PostResponse crearPost(Map<String, Object> payload) {
-
         String firebaseUid = (String) payload.get("firebaseUidAutor");
-
         Usuario autor = usuarioService.buscarPorFirebaseUid(firebaseUid)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
         List<Integer> idsMascotas = (List<Integer>) payload.get("mascotasIds");
-
         List<Mascota> mascotas = idsMascotas != null
                 ? idsMascotas.stream()
                 .map(id -> mascotaService.obtenerMascota(id.longValue()))
                 .toList()
                 : new ArrayList<>();
-
         Post post = Post.builder()
                 .rutaImagen((String) payload.get("rutaImagen"))
                 .descripcion((String) payload.get("descripcion"))
@@ -55,75 +52,79 @@ public class PostService {
                 .mascotasEtiquetadas(mascotas)
                 .fechaCreacion(LocalDateTime.now())
                 .build();
-
-        Post saved = postRepository.save(post);
-
+        Post saved = postRepository.saveAndFlush(post);
         return mapToResponse(saved);
     }
 
-    public List<PostResponse> getFeed() {
+    public List<PostResponse> getFeed(String usuarioActualUid) {
         return postRepository.findAllByOrderByFechaCreacionDesc()
                 .stream()
-                .map(this::mapToResponse)
+                .map(post -> this.mapToResponse(post, usuarioActualUid))
                 .toList();
     }
 
-    public List<PostResponse> getByUsuario(String uid) {
+    public List<PostResponse> getByUsuario(String uid, String usuarioActualUid) {
         return postRepository.findAllByOrderByFechaCreacionDesc()
                 .stream()
                 .filter(p -> p.getAutor().getFirebaseUid().equals(uid))
-                .map(this::mapToResponse)
+                .map(post -> this.mapToResponse(post, usuarioActualUid))
                 .toList();
     }
 
-    public List<PostResponse> getByMascota(Long id) {
+    public List<PostResponse> getByMascota(Long id, String usuarioActualUid) {
         return postRepository.findByMascotaId(id)
                 .stream()
-                .map(this::mapToResponse)
+                .map(post -> this.mapToResponse(post, usuarioActualUid))
                 .toList();
     }
 
-    private PostResponse mapToResponse(Post post) {
+    // ESTE ES EL QUE USA EL FEED (CON LIKES)
+    private PostResponse mapToResponse(Post post, String usuarioActualUid) {
+        // Aseguramos que la lista nunca sea nula para evitar errores
+        List<String> likesList = post.getLikedByUids() != null ? post.getLikedByUids() : new ArrayList<>();
         return PostResponse.builder()
                 .id(post.getId())
                 .rutaImagen(post.getRutaImagen())
                 .descripcion(post.getDescripcion())
                 .fechaCreacion(post.getFechaCreacion())
                 .autorNombre(post.getAutor().getNombre())
+                .autorNickname(post.getAutor().getNickname())
                 .autorUid(post.getAutor().getFirebaseUid())
                 .autorFotoPerfil(post.getAutor().getFotoPerfil())
                 .mascotasNombres(
-                        post.getMascotasEtiquetadas()
-                                .stream()
-                                .map(Mascota::getNombre)
-                                .toList()
+                        post.getMascotasEtiquetadas() != null
+                                ? post.getMascotasEtiquetadas().stream().map(Mascota::getNombre).toList()
+                                : new ArrayList<>()
                 )
+                .likes(likesList.size())
+                .liked(usuarioActualUid != null && likesList.contains(usuarioActualUid))
                 .build();
     }
 
-    public String guardarImagen(MultipartFile file) {
-        try {
-            // Creamos un nombre único para que no se machaquen fotos con el mismo nombre
-            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
-
-            // Definimos la ruta de la carpeta "uploads"
-            Path root = Paths.get("uploads");
-
-            // Si la carpeta no existe, la creamos
-            if (!Files.exists(root)) {
-                Files.createDirectories(root);
-            }
-
-            // Copiamos el archivo a la carpeta
-            Files.copy(file.getInputStream(), root.resolve(fileName));
-
-            return fileName; // Devolvemos el nombre que se guardará en la DB
-        } catch (IOException e) {
-            throw new RuntimeException("No se pudo guardar la imagen: " + e.getMessage());
-        }
+    // ESTE ES EL "ATAJO" PARA QUE NO DE ERROR EN crearPost
+    private PostResponse mapToResponse(Post post) {
+        // Simplemente llama al de arriba enviando 'null' en el usuario
+        return mapToResponse(post, null);
     }
 
-    public List<Post> obtenerPostsPorMascota(Long mascotaId) {
-        return postRepository.findByMascotaId(mascotaId);
+    @Transactional
+    public void toggleLike(Long postId, String usuarioUid) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post no encontrado"));
+
+        if (post.getLikedByUids().contains(usuarioUid)) {
+            post.getLikedByUids().remove(usuarioUid);
+        } else {
+            post.getLikedByUids().add(usuarioUid);
+        }
+        postRepository.save(post);
+    }
+
+    @Transactional
+    public void eliminarPost(Long id) {
+        if (!postRepository.existsById(id)) {
+            throw new RuntimeException("El post no existe");
+        }
+        postRepository.deleteById(id);
     }
 }
