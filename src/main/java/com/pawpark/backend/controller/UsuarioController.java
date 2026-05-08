@@ -77,9 +77,11 @@ public class UsuarioController {
     // BÚSQUEDA Y MULTIMEDIA
 
     @GetMapping("/buscar")
-    @Operation(summary = "Buscar usuarios por nombre", description = "Permite buscar perfiles de otros dueños de mascotas mediante una consulta de texto")
-    public List<Usuario> buscarUsuarios(@RequestParam String query) {
-        return usuarioService.buscarPorNombre(query);
+    @Operation(summary = "Búsqueda universal con prioridad", description = "Busca por nombre, nick o mascotas, priorizando a los usuarios que ya sigues")
+    public List<Usuario> buscarUsuarios(
+            @RequestParam String query,
+            @RequestParam String viewerUid) { // Necesitamos saber quién busca para priorizar
+        return usuarioService.buscarConPrioridad(query, viewerUid);
     }
 
     @PostMapping("/{seguidorUid}/seguir/{seguidoUid}")

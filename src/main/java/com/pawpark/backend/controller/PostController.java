@@ -1,7 +1,7 @@
 package com.pawpark.backend.controller;
 
 import com.pawpark.backend.dto.PostResponse;
-import com.pawpark.backend.model.Post;
+import com.pawpark.backend.dto.LikersResponse;
 import com.pawpark.backend.service.PostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -9,7 +9,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -62,5 +61,11 @@ public class PostController {
     @Operation(summary = "Obtener posts de una mascota", description = "Recupera las publicaciones donde una mascota específica ha sido etiquetada.")
     public List<PostResponse> obtenerPorMascota(@PathVariable Long id, @PathVariable String usuarioActualUid) {
         return postService.getByMascota(id, usuarioActualUid);
+    }
+
+    @GetMapping("/{postId}/likers")
+    @Operation(summary = "Obtener lista de usuarios que dieron like")
+    public List<LikersResponse> obtenerLikers(@PathVariable Long postId) {
+        return postService.obtenerUsuariosQueDieronLike(postId);
     }
 }

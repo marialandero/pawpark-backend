@@ -112,4 +112,9 @@ public class UsuarioService {
     public List<Usuario> buscarPorNombre(String query) {
         return usuarioRepository.findByNombreContainingIgnoreCase(query);
     }
+
+
+    public List<Usuario> buscarConPrioridad(String query, String viewerUid) {
+        return usuarioRepository.buscarConPrioridad(query, viewerUid);
+    }
 }

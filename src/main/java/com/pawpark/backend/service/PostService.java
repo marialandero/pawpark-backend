@@ -1,18 +1,14 @@
 package com.pawpark.backend.service;
 
 import com.pawpark.backend.dto.PostResponse;
+import com.pawpark.backend.dto.LikersResponse;
 import com.pawpark.backend.model.Mascota;
 import com.pawpark.backend.model.Post;
 import com.pawpark.backend.model.Usuario;
 import com.pawpark.backend.repository.PostRepository;
-import com.pawpark.backend.service.MascotaService;
-import com.pawpark.backend.service.UsuarioService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.*;
-import java.io.IOException;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -33,6 +29,7 @@ public class PostService {
     public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
     }
+
 
     @Transactional
     public PostResponse crearPost(Map<String, Object> payload) {
@@ -56,12 +53,14 @@ public class PostService {
         return mapToResponse(saved);
     }
 
+
     public List<PostResponse> getFeed(String usuarioActualUid) {
         return postRepository.findAllByOrderByFechaCreacionDesc()
                 .stream()
                 .map(post -> this.mapToResponse(post, usuarioActualUid))
                 .toList();
     }
+
 
     public List<PostResponse> getByUsuario(String uid, String usuarioActualUid) {
         return postRepository.findAllByOrderByFechaCreacionDesc()
@@ -71,12 +70,14 @@ public class PostService {
                 .toList();
     }
 
+
     public List<PostResponse> getByMascota(Long id, String usuarioActualUid) {
         return postRepository.findByMascotaId(id)
                 .stream()
                 .map(post -> this.mapToResponse(post, usuarioActualUid))
                 .toList();
     }
+
 
     // ESTE ES EL QUE USA EL FEED (CON LIKES)
     private PostResponse mapToResponse(Post post, String usuarioActualUid) {
@@ -101,11 +102,13 @@ public class PostService {
                 .build();
     }
 
+
     // ESTE ES EL "ATAJO" PARA QUE NO DE ERROR EN crearPost
     private PostResponse mapToResponse(Post post) {
         // Simplemente llama al de arriba enviando 'null' en el usuario
         return mapToResponse(post, null);
     }
+
 
     @Transactional
     public void toggleLike(Long postId, String usuarioUid) {
@@ -120,11 +123,30 @@ public class PostService {
         postRepository.save(post);
     }
 
+
     @Transactional
     public void eliminarPost(Long id) {
         if (!postRepository.existsById(id)) {
             throw new RuntimeException("El post no existe");
         }
         postRepository.deleteById(id);
+    }
+
+
+    public List<LikersResponse> obtenerUsuariosQueDieronLike(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new RuntimeException("Post no encontrado"));
+        // Convertimos la lista de UIDs en una lista de objetos Usuario con sus datos
+        return post.getLikedByUids().stream()
+                .map(uid -> usuarioService.buscarPorFirebaseUid(uid)
+                        .map(u -> LikersResponse.builder()
+                                .firebaseUid(u.getFirebaseUid())
+                                .nombre(u.getNombre())
+                                .nickname(u.getNickname())
+                                .fotoPerfil(u.getFotoPerfil())
+                                .build())
+                        .orElse(null))
+                .filter(u -> u != null) // Limpiamos por si algún usuario ya no existe
+                .toList();
     }
 }
