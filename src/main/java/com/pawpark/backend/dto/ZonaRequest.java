@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @Builder
-@NoArgsConstructor // <--- FUNDAMENTAL para Jackson
+@NoArgsConstructor
 @AllArgsConstructor
 public class ZonaRequest {
 

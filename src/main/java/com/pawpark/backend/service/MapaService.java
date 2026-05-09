@@ -34,8 +34,13 @@ public class MapaService {
      * Nota: Para que la prioridad social funcione, deberás ampliar este método
      * en el futuro para calcular 'tieneSeguidos' y 'tieneSeguidosFavoritos'.
      */
-    public List<ZonaStatsDTO> sincronizarZonas(List<ZonaRequest> zonasDto) {
+    public List<ZonaStatsDTO> sincronizarZonas(List<ZonaRequest> zonasDto, String userUid) {
+        // Buscamos al usuario que consulta para conocer sus seguidos y favoritos
+        Usuario usuarioConsulta = usuarioRepository.findByFirebaseUid(userUid)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
         return zonasDto.stream().map(dto -> {
+            // Buscamos o creamos la zona
             Zona zona = zonaRepository.findByOsmId(dto.getOsmId())
                     .orElseGet(() -> zonaRepository.save(Zona.builder()
                             .osmId(dto.getOsmId())
@@ -45,11 +50,21 @@ public class MapaService {
                             .tipo(dto.getTipo())
                             .build()));
 
-            long conteo = checkInRepository.countByZonaOsmIdAndFechaExpiracionAfter(zona.getOsmId(), LocalDateTime.now());
+            // Obtenemos los check-ins activos en esta zona específica
+            List<CheckIn> checkInsEnZona = checkInRepository.findAllByZonaOsmIdAndFechaExpiracionAfter(
+                    zona.getOsmId(), LocalDateTime.now());
+
+            // ¿Hay algún usuario al que yo sigo en este parque?
+            boolean tieneSeguidos = checkInsEnZona.stream()
+                    .anyMatch(ci -> usuarioConsulta.getSiguiendo().contains(ci.getUsuario()));
+
+            // ¿Hay alguna mascota marcada como favorita por mí en este parque?
+            boolean tieneFavs = checkInsEnZona.stream()
+                    .anyMatch(ci -> usuarioConsulta.getMascotasFavoritas().contains(ci.getMascota()));
 
             // Por ahora devolvemos los booleanos en false hasta que implementes la lógica de seguidos
             return new ZonaStatsDTO(zona.getOsmId(), zona.getNombre(),
-                    zona.getLatitud(), zona.getLongitud(), conteo, false, false, zona.getTipo());
+                    zona.getLatitud(), zona.getLongitud(), checkInsEnZona.size(), tieneSeguidos, tieneFavs, zona.getTipo());
         }).toList();
     }
 
@@ -58,6 +73,9 @@ public class MapaService {
      * para evitar que el perro se quede "atrapado" en el mapa si el usuario olvida salir.
      */
     public void registrarCheckIn(CheckInRequest request) {
+        System.out.println("DEBUG: Recibiendo check-in para UID: " + request.getUid());
+        System.out.println("DEBUG: Mascotas seleccionadas: " + request.getMascotasIds());
+        System.out.println("DEBUG: Zona OSM ID: " + request.getOsmId());
         Usuario user = usuarioRepository.findByFirebaseUid(request.getUid())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 

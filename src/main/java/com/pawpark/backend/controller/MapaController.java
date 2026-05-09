@@ -2,6 +2,7 @@ package com.pawpark.backend.controller;
 
 import com.pawpark.backend.dto.CheckInRequest;
 import com.pawpark.backend.dto.ZonaRequest;
+import com.pawpark.backend.dto.ZonaSincroRequest;
 import com.pawpark.backend.dto.ZonaStatsDTO;
 import com.pawpark.backend.service.MapaService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,13 +26,9 @@ public class MapaController {
 
     @PostMapping("/sincronizar")
     @Operation(summary = "Sincronizar zonas del mapa", description = "Recibe las zonas detectadas por el frontend y devuelve el conteo de mascotas en tiempo real para cada una")
-    public ResponseEntity<List<ZonaStatsDTO>> sincronizar(@RequestBody List<ZonaRequest> zonas) {
-        /*
-           Este método es el corazón del mapa. Recibe una lista de lo que el usuario ve en su pantalla
-           y el backend decide si debe registrar nuevas zonas o simplemente contar cuántos perritos
-           hay en las existentes.
-        */
-        return ResponseEntity.ok(mapaService.sincronizarZonas(zonas));
+    public ResponseEntity<List<ZonaStatsDTO>> sincronizar(@RequestBody ZonaSincroRequest request) {
+        // Pasamos tanto las zonas como el UID del usuario al servicio
+        return ResponseEntity.ok(mapaService.sincronizarZonas(request.getZonas(), request.getUid()));
     }
 
     @PostMapping("/checkin")

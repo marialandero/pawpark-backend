@@ -15,6 +15,7 @@ public interface CheckInRepository extends JpaRepository<CheckIn, Long> {
     // Busca el check-in activo de un usuario (por si quiere salir manualmente)
     List<CheckIn> findAllByUsuarioFirebaseUidAndFechaExpiracionAfter(String uid, LocalDateTime ahora);
 
-    // Lista todos los check-ins activos de una zona para ver quiénes están
-    List<CheckIn> findByZonaOsmIdAndFechaExpiracionAfter(String osmId, LocalDateTime ahora);
+    // Esta es la consulta clave para el mapa:
+    // Busca check-ins de una zona específica que aún no hayan caducado
+    List<CheckIn> findAllByZonaOsmIdAndFechaExpiracionAfter(String osmId, LocalDateTime ahora);
 }
