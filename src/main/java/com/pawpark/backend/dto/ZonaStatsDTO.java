@@ -17,7 +17,7 @@ public class ZonaStatsDTO {
     private String nombre;
     private double latitud;
     private double longitud;
-
-    // Cantidad de mascotas con un Check-In activo (no expirado) en esta zona.
-    private long perrosPresentes;
+    private long perrosPresentes; // Cantidad de mascotas con un Check-In activo (no expirado) en esta zona.
+    private boolean tieneSeguidos;
+    private boolean tieneSeguidosFavoritos;
 }

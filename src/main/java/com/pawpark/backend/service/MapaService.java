@@ -30,13 +30,12 @@ public class MapaService {
     private MascotaRepository mascotaRepository;
 
     /**
-     * Compara los parques que ve el usuario en el móvil con la base de datos local.
-     * Si un parque es nuevo, lo registra. Si ya existe, cuenta cuántos perros hay.
+     * Sincroniza las zonas y devuelve las estadísticas.
+     * Nota: Para que la prioridad social funcione, deberás ampliar este método
+     * en el futuro para calcular 'tieneSeguidos' y 'tieneSeguidosFavoritos'.
      */
     public List<ZonaStatsDTO> sincronizarZonas(List<ZonaRequest> zonasDto) {
         return zonasDto.stream().map(dto -> {
-
-            // Buscamos por osmId. Si no existe, creamos la zona "al vuelo" (Lazy Loading).
             Zona zona = zonaRepository.findByOsmId(dto.getOsmId())
                     .orElseGet(() -> zonaRepository.save(Zona.builder()
                             .osmId(dto.getOsmId())
@@ -45,11 +44,12 @@ public class MapaService {
                             .longitud(dto.getLongitud())
                             .tipo(dto.getTipo())
                             .build()));
-            // Contamos los check-ins cuya fecha de expiración aún no ha llegado.
+
             long conteo = checkInRepository.countByZonaOsmIdAndFechaExpiracionAfter(zona.getOsmId(), LocalDateTime.now());
 
+            // Por ahora devolvemos los booleanos en false hasta que implementes la lógica de seguidos
             return new ZonaStatsDTO(zona.getOsmId(), zona.getNombre(),
-                    zona.getLatitud(), zona.getLongitud(), conteo);
+                    zona.getLatitud(), zona.getLongitud(), conteo, false, false);
         }).toList();
     }
 
@@ -58,19 +58,41 @@ public class MapaService {
      * para evitar que el perro se quede "atrapado" en el mapa si el usuario olvida salir.
      */
     public void registrarCheckIn(CheckInRequest request) {
-        Usuario user = usuarioRepository.findByFirebaseUid(request.getUid()).orElseThrow();
-        Mascota pet = mascotaRepository.findById(request.getMascotaId()).orElseThrow();
-        Zona zona = zonaRepository.findByOsmId(request.getOsmId()).orElseThrow();
+        Usuario user = usuarioRepository.findByFirebaseUid(request.getUid())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        CheckIn checkIn = CheckIn.builder()
-                .usuario(user)
-                .mascota(pet)
-                .zona(zona)
-                .fechaEntrada(LocalDateTime.now())
-                .fechaExpiracion(LocalDateTime.now().plusMinutes(90)) // El TTL de 90 min
-                .build();
+        // CAMBIO AQUÍ: En lugar de orElseThrow, usamos orElseGet para crearla si no existe
+        Zona zona = zonaRepository.findByOsmId(request.getOsmId())
+                .orElseGet(() -> {
+                    // Si llegamos aquí es que por algún motivo la zona no se sincronizó antes.
+                    // Podrías registrarla con datos básicos o lanzar un error controlado.
+                    // Lo ideal es que la zona ya exista, pero para evitar el crash:
+                    return zonaRepository.save(Zona.builder()
+                            .osmId(request.getOsmId())
+                            .nombre("Zona cargada por Check-in") // Nombre genérico si no lo tenemos
+                            .build());
+                });
 
-        checkInRepository.save(checkIn);
+        // REGLA: Cerramos cualquier estancia previa antes de entrar a una nueva zona
+        salidaManual(request.getUid());
+
+        // Registramos cada mascota seleccionada
+        if (request.getMascotasIds() != null) {
+            request.getMascotasIds().forEach(id -> {
+                Mascota pet = mascotaRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Mascota no encontrada: " + id));
+
+                CheckIn checkIn = CheckIn.builder()
+                        .usuario(user)
+                        .mascota(pet)
+                        .zona(zona)
+                        .fechaEntrada(LocalDateTime.now())
+                        .fechaExpiracion(LocalDateTime.now().plusMinutes(90))
+                        .build();
+
+                checkInRepository.save(checkIn);
+            });
+        }
     }
 
     /**
@@ -78,10 +100,12 @@ public class MapaService {
      * el perro desaparezca del mapa inmediatamente.
      */
     public void salidaManual(String uid) {
-        checkInRepository.findByUsuarioFirebaseUidAndFechaExpiracionAfter(uid, LocalDateTime.now())
-                .ifPresent(check -> {
-                    check.setFechaExpiracion(LocalDateTime.now());
-                    checkInRepository.save(check);
-                });
+        // Busca todos los check-ins activos del usuario y los caduca todos
+        List<CheckIn> checkInsActivos = checkInRepository.findAllByUsuarioFirebaseUidAndFechaExpiracionAfter(uid, LocalDateTime.now());
+
+        checkInsActivos.forEach(check -> {
+            check.setFechaExpiracion(LocalDateTime.now());
+            checkInRepository.save(check);
+        });
     }
 }

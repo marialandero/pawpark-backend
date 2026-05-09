@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/mapa")
+@RequestMapping("/mapa")
 @CrossOrigin(origins = "*") /* <-- ORIGEN habilitado para permitir la comunicación con Flutter.
 Al igual que en Mascotas, esto elimina las restricciones de CORS durante el desarrollo y pruebas
 permitiendo que el mapa cargue los datos de ocupación sin bloqueos de seguridad */
