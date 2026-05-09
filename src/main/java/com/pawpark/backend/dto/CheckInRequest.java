@@ -1,6 +1,8 @@
 package com.pawpark.backend.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -8,6 +10,8 @@ import java.util.List;
  * Solicitud para registrar la presencia de un binomio Usuario-Mascota en una zona.
  */
 @Data
+@NoArgsConstructor // <--- Añádelo también aquí
+@AllArgsConstructor
 public class CheckInRequest {
 
     // UID de Firebase para identificar al dueño que realiza la acción.

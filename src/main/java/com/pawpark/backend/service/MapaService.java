@@ -49,7 +49,7 @@ public class MapaService {
 
             // Por ahora devolvemos los booleanos en false hasta que implementes la lógica de seguidos
             return new ZonaStatsDTO(zona.getOsmId(), zona.getNombre(),
-                    zona.getLatitud(), zona.getLongitud(), conteo, false, false);
+                    zona.getLatitud(), zona.getLongitud(), conteo, false, false, zona.getTipo());
         }).toList();
     }
 

@@ -1,7 +1,9 @@
 package com.pawpark.backend.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Objeto de transferencia para recibir datos geográficos desde el frontend.
@@ -9,6 +11,8 @@ import lombok.Data;
  */
 @Data
 @Builder
+@NoArgsConstructor // <--- FUNDAMENTAL para Jackson
+@AllArgsConstructor
 public class ZonaRequest {
 
     // ID único de OpenStreetMap (ej: "way/1234567"). Es la clave de sincronización.
