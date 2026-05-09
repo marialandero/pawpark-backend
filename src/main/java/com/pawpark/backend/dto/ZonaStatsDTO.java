@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * Objeto de respuesta que combina datos geográficos con estadísticas de ocupación.
  * Permite al frontend renderizar los indicadores numéricos (burbujas) sobre el mapa.
@@ -21,4 +23,5 @@ public class ZonaStatsDTO {
     private boolean tieneSeguidos;
     private boolean tieneSeguidosFavoritos;
     private String tipo;
+    private List<UsuarioPresenteDTO> usuarios;
 }

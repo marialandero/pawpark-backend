@@ -1,6 +1,7 @@
 package com.pawpark.backend.service;
 
 import com.pawpark.backend.dto.CheckInRequest;
+import com.pawpark.backend.dto.UsuarioPresenteDTO;
 import com.pawpark.backend.dto.ZonaRequest;
 import com.pawpark.backend.dto.ZonaStatsDTO;
 import com.pawpark.backend.model.CheckIn;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class MapaService {
@@ -64,7 +66,7 @@ public class MapaService {
 
             // Por ahora devolvemos los booleanos en false hasta que implementes la lógica de seguidos
             return new ZonaStatsDTO(zona.getOsmId(), zona.getNombre(),
-                    zona.getLatitud(), zona.getLongitud(), checkInsEnZona.size(), tieneSeguidos, tieneFavs, zona.getTipo());
+                    zona.getLatitud(), zona.getLongitud(), checkInsEnZona.size(), tieneSeguidos, tieneFavs, zona.getTipo(), obtenerUsuariosEnZona(zona.getOsmId()));
         }).toList();
     }
 
@@ -125,5 +127,30 @@ public class MapaService {
             check.setFechaExpiracion(LocalDateTime.now());
             checkInRepository.save(check);
         });
+    }
+
+
+    private List<UsuarioPresenteDTO> obtenerUsuariosEnZona(String osmId) {
+        // Buscamos los check-ins activos en esa zona
+        List<CheckIn> checkInsActivos = checkInRepository.findAllByZonaOsmIdAndFechaExpiracionAfter(osmId, LocalDateTime.now());
+
+        // Agrupamos por usuario (porque un usuario puede ir con varias mascotas)
+        return checkInsActivos.stream()
+                .collect(Collectors.groupingBy(CheckIn::getUsuario))
+                .entrySet().stream()
+                .map(entry -> {
+                    Usuario u = entry.getKey();
+                    List<String> nombresMascotas = entry.getValue().stream()
+                            .map(ci -> ci.getMascota().getNombre())
+                            .collect(Collectors.toList());
+
+                    return UsuarioPresenteDTO.builder()
+                            .usuario(u.getNombre())
+                            .fotoPerfil(u.getFotoPerfil())
+                            .firebaseUid(u.getFirebaseUid())
+                            .mascotas(nombresMascotas)
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }
