@@ -1,5 +1,6 @@
 package com.pawpark.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,9 +45,14 @@ public class Usuario {
     private List<Mascota> mascotas = new ArrayList<>();
 
     // Relación obtener la lista de publicaciones
-    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnoreProperties("autor")
     private List<Post> posts = new ArrayList<>();
+
+    // Relación para que al borrar al usuario se borren sus quedadas organizadas
+    @OneToMany(mappedBy = "creador", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Quedada> quedadasOrganizadas = new ArrayList<>();
 
     // Sistema de Seguidores (Sustituye a "Amigos")
     // Esta lista representa a quién sigue este usuario (unidireccional)

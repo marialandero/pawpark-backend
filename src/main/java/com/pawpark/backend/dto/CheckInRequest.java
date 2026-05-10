@@ -10,7 +10,7 @@ import java.util.List;
  * Solicitud para registrar la presencia de un binomio Usuario-Mascota en una zona.
  */
 @Data
-@NoArgsConstructor // <--- Añádelo también aquí
+@NoArgsConstructor
 @AllArgsConstructor
 public class CheckInRequest {
 

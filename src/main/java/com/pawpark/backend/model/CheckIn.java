@@ -1,5 +1,7 @@
 package com.pawpark.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,15 +33,16 @@ public class CheckIn {
     // Relación con el usuario que hace el check-in
     @ManyToOne
     @JoinColumn(name = "usuario_id")
+    @JsonIgnoreProperties({"mascotas", "posts", "siguiendo", "seguidores", "mascotasFavoritas"})
     private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "mascota_id")
+    @JsonIgnoreProperties({"dueno", "checkIns", "amigosFavoritos"})
     private Mascota mascota;
 
     @ManyToOne
     @JoinColumn(name = "zona_id")
+    @JsonIgnore
     private Zona zona;
-
-
 }

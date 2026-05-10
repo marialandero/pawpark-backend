@@ -33,11 +33,11 @@ public class QuedadaService {
     public Quedada crearQuedadaCompleta(String creadorUid, String titulo, String descripcion,
                                         String lugarNombre, String fechaHoraStr, List<Long> mascotasIds) {
 
-        // 1. Buscamos al creador en la base de datos
+        // Buscamos al creador en la base de datos
         Usuario creador = usuarioService.buscarPorFirebaseUid(creadorUid)
                 .orElseThrow(() -> new RuntimeException("Usuario creador no encontrado"));
 
-        // 2. Creamos e inicializamos la entidad
+        // Creamos e inicializamos la entidad
         Quedada quedada = new Quedada();
         quedada.setTitulo(titulo);
         quedada.setDescripcion(descripcion);
@@ -45,20 +45,20 @@ public class QuedadaService {
         quedada.setFechaHora(LocalDateTime.parse(fechaHoraStr));
         quedada.setCreador(creador);
 
-        // 3. Inicializamos las listas de asistentes (importante para evitar NullPointer)
+        // Inicializamos las listas de asistentes (importante para evitar NullPointer)
         quedada.setUsuariosAsistentes(new ArrayList<>());
         quedada.setPerrosAsistentes(new ArrayList<>());
 
-        // 4. El creador se añade a sí mismo como asistente humano[cite: 1, 6]
+        // El creador se añade a sí mismo como asistente humano[cite: 1, 6]
         quedada.getUsuariosAsistentes().add(creador);
 
-        // 5. Si hay mascotas seleccionadas, las buscamos y las añadimos[cite: 5, 6]
+        // Si hay mascotas seleccionadas, las buscamos y las añadimos[cite: 5, 6]
         if (mascotasIds != null && !mascotasIds.isEmpty()) {
             List<Mascota> mascotas = mascotaRepository.findAllById(mascotasIds);
             quedada.getPerrosAsistentes().addAll(mascotas);
         }
 
-        // 6. Guardamos la quedada con todas sus relaciones establecidas
+        // Guardamos la quedada con todas sus relaciones establecidas
         return quedadaRepository.save(quedada);
     }
 

@@ -1,5 +1,6 @@
 package com.pawpark.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -37,6 +38,7 @@ public class Zona {
 
     // Relación con los check-ins actuales para conocer la ocupación en tiempo real.
     @OneToMany(mappedBy = "zona", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     @Builder.Default
     private List<CheckIn> checkInsActivos = new ArrayList<>();
 }

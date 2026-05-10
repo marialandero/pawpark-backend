@@ -1,5 +1,6 @@
 package com.pawpark.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -47,10 +48,15 @@ public class Mascota {
 
     // Amigos favoritos de la mascota
     @ManyToMany
-    @JoinTable(
-            name = "amistad_mascota",
+    @JsonIgnoreProperties({"amigosFavoritos", "checkIns", "dueno"})
+    @JoinTable(name = "amistad_mascota",
             joinColumns = @JoinColumn(name = "mascota_id"),
             inverseJoinColumns = @JoinColumn(name = "amigo_id")
     )
     private List<Mascota> amigosFavoritos = new ArrayList<>();
+
+    // Esto asegura que si borro al perro, sus check-ins en el mapa se borren solos
+    @OneToMany(mappedBy = "mascota", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<CheckIn> checkIns = new ArrayList<>();
 }

@@ -74,6 +74,17 @@ public class UsuarioController {
         usuarioService.eliminarUsuario(id);
     }
 
+    @DeleteMapping("/firebase/{uid}")
+    @Operation(summary = "Dar de baja cuenta por Firebase UID", description = "Elimina al usuario y todo su rastro (mascotas, posts, checkins)")
+    public ResponseEntity<Void> eliminarPorFirebaseUid(@PathVariable String uid) {
+        return usuarioService.buscarPorFirebaseUid(uid)
+                .map(usuario -> {
+                    usuarioService.eliminarUsuario(usuario.getId());
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // BÚSQUEDA Y MULTIMEDIA
 
     @GetMapping("/buscar")
