@@ -51,6 +51,12 @@ public class PostController {
         return postService.getFeed(usuarioUid);
     }
 
+    @GetMapping("/seguidos/{usuarioUid}")
+    @Operation(summary = "Obtener posts de seguidos", description = "Recupera publicaciones de los usuarios a los que el usuario actual sigue.")
+    public List<PostResponse> obtenerPorSeguidos(@PathVariable String usuarioUid) {
+        return postService.getPostsDeSeguidos(usuarioUid);
+    }
+
     @GetMapping("/usuario/{uid}/{usuarioActualUid}")
     @Operation(summary = "Obtener posts de un usuario", description = "Filtra y devuelve las publicaciones realizadas por un dueño específico mediante su Firebase UID.")
     public List<PostResponse> obtenerPorUsuario(@PathVariable String uid, @PathVariable String usuarioActualUid) {

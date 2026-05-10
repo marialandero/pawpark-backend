@@ -2,10 +2,12 @@ package com.pawpark.backend.service;
 
 import com.pawpark.backend.dto.PostResponse;
 import com.pawpark.backend.dto.LikersResponse;
+import com.pawpark.backend.exception.RecursoNoEncontradoException;
 import com.pawpark.backend.model.Mascota;
 import com.pawpark.backend.model.Post;
 import com.pawpark.backend.model.Usuario;
 import com.pawpark.backend.repository.PostRepository;
+import com.pawpark.backend.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class PostService {
 
     @Autowired
     private MascotaService mascotaService;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
     public PostService(PostRepository postRepository) {
         this.postRepository = postRepository;
@@ -58,6 +63,27 @@ public class PostService {
         return postRepository.findAllByOrderByFechaCreacionDesc()
                 .stream()
                 .map(post -> this.mapToResponse(post, usuarioActualUid))
+                .toList();
+    }
+
+
+    public List<PostResponse> getPostsDeSeguidos(String usuarioUid) {
+        // Buscamos al usuario que hace la petición
+        Usuario usuarioActual = usuarioRepository.findByFirebaseUid(usuarioUid)
+                .orElseThrow(() -> new RecursoNoEncontradoException("Usuario no encontrado"));
+        // Obtenemos la lista de IDs de la gente a la que sigue
+        List<Long> seguidosIds = usuarioActual.getSiguiendo().stream()
+                .map(Usuario::getId)
+                .toList();
+        // Si no sigue a nadie, devolvemos lista vacía (para evitar errores en la query)
+        if (seguidosIds.isEmpty()) {
+            return List.of();
+        }
+        // Llamamos al repositorio
+        List<Post> posts = postRepository.findByAutorIdInOrderByFechaCreacionDesc(seguidosIds);
+        // Mapeamos a PostResponse
+        return posts.stream()
+                .map(post -> mapToResponse(post, usuarioUid))
                 .toList();
     }
 

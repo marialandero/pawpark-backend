@@ -9,15 +9,20 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
 
-    // Para ver las fotos en el perfil del Usuario
-    List<Post> findByAutorIdOrderByFechaCreacionDesc(Long usuarioId);
+    // Para la pestaña de solo Mis posts
+    List<Post> findByAutorIdInOrderByFechaCreacionDesc(List<Long> usuarioIds);
 
-    // Para ver las fotos donde sale una Mascota específica
-    // List<Post> findByMascotasEtiquetadasIdOrderByFechaCreacionDesc(Long mascotaId);
+    // Para la pestaña de los posts de Seguidos
+    // Buscamos posts donde el autor esté en la lista de "siguiendo" del usuario actual
+    @Query("SELECT p FROM Post p WHERE p.autor IN " +
+            "(SELECT u FROM Usuario u1 JOIN u1.siguiendo u WHERE u1.id = :usuarioId) " +
+            "ORDER BY p.fechaCreacion DESC")
+    List<Post> findPostsDeSeguidos(@Param("usuarioId") Long usuarioId);
 
-    // Para el Feed global
+    // Para la pestaña del Feed global
     List<Post> findAllByOrderByFechaCreacionDesc();
 
+    // Para ver las fotos donde sale una Mascota específica
     @Query("SELECT p FROM Post p JOIN p.mascotasEtiquetadas m WHERE m.id = :id")
     List<Post> findByMascotaId(@Param("id") Long id);
 }
